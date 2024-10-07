@@ -1,45 +1,46 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     const outputTextarea = document.getElementById('output');
     const charCountElement = document.getElementById('charCount');
+    const postButton = document.getElementById('postToX');
 
     // テキストエリアのリアルタイムカウント
-    outputTextarea.addEventListener('input', function () {
-        const text = outputTextarea.value;
-        const count = calculateCharacterCount(text);
-        charCountElement.textContent = `文字数: ${count}/280`;
+    outputTextarea.addEventListener('input', () => {
+        updateCharacterCount(outputTextarea, charCountElement);
     });
 
     // バックグラウンドからデータ取得
-    chrome.runtime.sendMessage({ action: "runModal" }, function (response) {
+    chrome.runtime.sendMessage({ action: "runModal" }, (response) => {
         if (response) {
             outputTextarea.value = response.output;
-            const count = calculateCharacterCount(outputTextarea.value);
-            charCountElement.textContent = `文字数: ${count}/280`;
+            updateCharacterCount(outputTextarea, charCountElement);
         }
     });
+
+    // 「Xへ投稿」ボタンが押されたときの処理
+    postButton.addEventListener('click', () => {
+        const textToPost = outputTextarea.value;
+        console.log("Xへ投稿されました: " + textToPost);
+
+        // Xの投稿ページを新しいタブで開く
+        const tweetUrl = `https://x.com/intent/post?text=${encodeURIComponent(textToPost)}`;
+        window.open(tweetUrl, '_blank');
+    });
 });
+
+// 文字カウントの更新ロジック
+function updateCharacterCount(textarea, countElement) {
+    const text = textarea.value;
+    const count = calculateCharacterCount(text);
+    countElement.textContent = `文字数: ${count}/280`;
+}
 
 // 文字カウントロジック
 function calculateCharacterCount(text) {
-    let count = 0;
-    for (const char of text) {
-        if (char.match(/[\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff]/)) {
-            count += 2; // 全角文字
-        } else if (char === '\n') {
-            count += 1; // 改行
+    return [...text].reduce((count, char) => {
+        if (char.match(/[一-龯぀-ゟ゠-ヿ]/)) {
+            return count + 2; // 全角文字
         } else {
-            count += 1; // 半角文字
+            return count + 1; // 半角文字・改行
         }
-    }
-    return count;
+    }, 0);
 }
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    const postButton = document.getElementById('postToX');
-
-    postButton.addEventListener('click', function () {
-        console.log("Xへ投稿されました: " + output.value);
-    });
-});
-
