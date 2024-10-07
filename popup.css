@@ -1,0 +1,115 @@
+/* ベーススタイル */
+body {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width:600px;
+  background-color: #f0f0f0;
+}
+
+.container {
+  width: 90%;
+  /* max-width: 500px; */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.5em;
+  text-align: center;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+textarea {
+  width: 80vw;
+  height: 300px;
+  line-height: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+  resize: none;
+}
+
+textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+p {
+  margin: 10px 0;
+  font-size: 1em;
+  text-align: right;
+  color: #555;
+}
+
+button {
+  width: 50%;
+  padding: 10px;
+  font-size: 1.1em;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* ボタンの無効化スタイル
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+} */
+
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  body {
+      background-color: #121212;
+  }
+
+  .container {
+      background-color: #1e1e1e;
+      box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+  }
+
+  h1 {
+      color: #ddd;
+  }
+
+  textarea {
+      background-color: #333;
+      color: #ddd;
+      border-color: #555;
+  }
+
+  textarea:focus {
+      border-color: #66bfff;
+  }
+
+  p {
+      color: #aaa;
+  }
+
+  button {
+      background-color: #0056b3;
+  }
+
+  button:hover {
+      background-color: #004494;
+  }
+}
