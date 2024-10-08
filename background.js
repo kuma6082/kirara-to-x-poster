@@ -55,7 +55,7 @@ function runModal() {
               output += "🔍わかったこと\n";
               break;
             case "感じたこと":
-              output += "💮感じたこと\n";
+              output += "💭感じたこと\n";
               break;
             case "学習時間":
               output += "⏰学習時間\n";
