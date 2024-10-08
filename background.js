@@ -28,47 +28,48 @@ function runModal() {
   );
   const targetElement = resultDocu.singleNodeValue;
 
-  const xpathH2 = "/html/body/main/div/div[2]/h2";
-  const resultH2 = document.evaluate(
-    xpathH2,
-    document,
-    null,
-    XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null
-  );
-  const h2Element = resultH2.singleNodeValue;
-
   let output = "";
 
-  if (h2Element) {
-    output += `${h2Element.innerText}-学習記録\n`;
-  }
+  // 日付を追加（例として固定の日付にしてますが、現在日付にする場合はDateオブジェクトを使用）
+  const today = new Date();
+  const formattedDate = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+  output += `${formattedDate}\n`;
 
   if (targetElement) {
+    let skipSection = false;
     targetElement.childNodes.forEach((child) => {
       if (child.nodeType === Node.ELEMENT_NODE) {
         if (child.tagName.toLowerCase() === "h3") {
+          // 「次やること」セクションとそれに付随する内容をスキップする
+          if (child.innerText === "次やること") {
+            skipSection = true;
+            return;
+          } else {
+            skipSection = false;
+          }
           switch (child.innerText) {
             case "取り組んだこと":
-              output += "📝 取り組んだこと\n";
+              output += "📝取り組んだこと\n";
               break;
             case "わかったこと":
-              output += "🔍 わかったこと\n";
+              output += "🔍わかったこと\n";
               break;
             case "感じたこと":
-              output += "💭 感じたこと\n";
+              output += "💮感じたこと\n";
               break;
             case "学習時間":
-              output += "⏰ 学習時間\n";
+              output += "⏰学習時間\n";
               break;
           }
-        } else if (child.tagName.toLowerCase() === "ul") {
-          const liElements = child.querySelectorAll("li");
-          liElements.forEach((li) => {
-            output += `•${li.innerText}\n`;
-          });
-        } else {
-          output += `${child.innerText}\n`;
+        } else if (!skipSection) {
+          if (child.tagName.toLowerCase() === "ul") {
+            const liElements = child.querySelectorAll("li");
+            liElements.forEach((li) => {
+              output += `•${li.innerText}\n`;
+            });
+          } else {
+            output += `${child.innerText}\n`;
+          }
         }
       }
     });
