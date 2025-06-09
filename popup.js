@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const outputTextarea = document.getElementById("output");
   const charCountElement = document.getElementById("charCount");
   const postButton = document.getElementById("postToX");
+  const summarizeButton = document.getElementById("summarize");
 
   // テキストエリアのリアルタイムカウント
   outputTextarea.addEventListener("input", () => {
@@ -13,6 +14,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (response) {
       outputTextarea.value = response.output;
       updateCharacterCount(outputTextarea, charCountElement);
+    }
+  });
+
+  // Geminiで要約ボタン
+  summarizeButton.addEventListener("click", async () => {
+    const apiKey = await loadApiKey();
+    if (!apiKey) {
+      alert("APIキーが未設定です");
+      return;
+    }
+    try {
+      const summary = await summarizeWithGemini(outputTextarea.value, apiKey);
+      outputTextarea.value = summary;
+      updateCharacterCount(outputTextarea, charCountElement);
+    } catch (e) {
+      console.error("Gemini summarization failed", e);
+      alert("要約に失敗しました");
     }
   });
 
@@ -58,4 +76,46 @@ function calculateCharacterCount(text) {
       }
     }, 0);
   }
+}
+
+// chrome.storage から API キー取得
+function loadApiKey() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(["geminiApiKey"], (items) => {
+      resolve(items.geminiApiKey || "");
+    });
+  });
+}
+
+// Gemini API を用いた要約
+async function summarizeWithGemini(text, apiKey) {
+  const body = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `以下のテキストを投稿用フォーマットを保ったまま簡潔に要約してください:\n${text}`,
+          },
+        ],
+      },
+    ],
+  };
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("API request failed");
+  }
+
+  const data = await res.json();
+  return (
+    data.candidates?.[0]?.content?.parts?.[0]?.text || text
+  );
 }
