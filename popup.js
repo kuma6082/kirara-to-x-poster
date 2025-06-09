@@ -81,7 +81,7 @@ function calculateCharacterCount(text) {
 // chrome.storage から API キー取得
 function loadApiKey() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get(["geminiApiKey"], (items) => {
+    chrome.storage.local.get(["geminiApiKey"], (items) => {
       resolve(items.geminiApiKey || "");
     });
   });
