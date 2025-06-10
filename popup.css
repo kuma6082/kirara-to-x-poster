@@ -52,8 +52,13 @@ p {
   color: #555;
 }
 
+.button-row {
+  display: flex;
+  gap: 10px;
+}
+
 button {
-  width: 50%;
+  flex: 1;
   padding: 10px;
   font-size: 1.1em;
   color: white;
