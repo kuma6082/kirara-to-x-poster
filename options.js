@@ -15,13 +15,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('saveButton').addEventListener('click', () => {
-    chrome.storage.local.set({ geminiApiKey: input.value }, () => {
+    const newKey = input.value;
+    chrome.storage.local.set({ geminiApiKey: newKey }, () => {
       if (chrome.runtime.lastError) {
         console.error('APIキーの保存に失敗しました', chrome.runtime.lastError);
-        alert('保存に失敗しました');
-      } else {
-        alert('保存しました');
+        alert(`保存に失敗しました: ${chrome.runtime.lastError.message}`);
+        return;
       }
+      chrome.storage.local.get(['geminiApiKey'], (items) => {
+        if (chrome.runtime.lastError) {
+          console.error('保存後の確認に失敗しました', chrome.runtime.lastError);
+          alert(`保存後の確認に失敗しました: ${chrome.runtime.lastError.message}`);
+          return;
+        }
+        if (items.geminiApiKey === newKey) {
+          alert('保存しました');
+        } else {
+          console.error('保存された値が一致しません', { saved: items.geminiApiKey, expected: newKey });
+          alert('保存された値が正しくありません');
+        }
+      });
     });
   });
 });
