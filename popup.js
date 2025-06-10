@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
   const outputTextarea = document.getElementById("output");
   const charCountElement = document.getElementById("charCount");
@@ -94,7 +95,7 @@ async function summarizeWithGemini(text, apiKey) {
       {
         parts: [
           {
-            text: `以下のテキストを投稿用フォーマットを保ったまま簡潔に要約してください:\n${text}`,
+            text: SUMMARY_PROMPT_PREFIX + SUMMARY_PROMPT_TEMPLATE + text,
           },
         ],
       },
