@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const charCountElement = document.getElementById("charCount");
   const postButton = document.getElementById("postToX");
   const summarizeButton = document.getElementById("summarize");
+  const loadingOverlay = document.getElementById("loadingOverlay");
 
   // 背景ページから取得した元テキストを保持
   let originalText = "";
@@ -29,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("APIキーが未設定です");
       return;
     }
+    loadingOverlay.classList.add("active");
+    summarizeButton.disabled = true;
     try {
       const summary = await summarizeWithGemini(originalText, apiKey);
       outputTextarea.value = summary;
@@ -36,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("Gemini summarization failed", e);
       alert("要約に失敗しました");
+    } finally {
+      loadingOverlay.classList.remove("active");
+      summarizeButton.disabled = false;
     }
   });
 
