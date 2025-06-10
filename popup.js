@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const postButton = document.getElementById("postToX");
   const summarizeButton = document.getElementById("summarize");
   const loadingOverlay = document.getElementById("loadingOverlay");
+  const openOptionsBtn = document.getElementById("openOptions");
 
   // 背景ページから取得した元テキストを保持
   let originalText = "";
@@ -43,6 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
       loadingOverlay.classList.remove("active");
       summarizeButton.disabled = false;
     }
+  });
+
+  // オプション表示ボタン
+  openOptionsBtn.addEventListener("click", () => {
+    chrome.windows.create({
+      url: chrome.runtime.getURL("options.html"),
+      type: "popup",
+      width: 400,
+      height: 200,
+    });
   });
 
 
