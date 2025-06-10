@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const postButton = document.getElementById("postToX");
   const summarizeButton = document.getElementById("summarize");
 
+  // 背景ページから取得した元テキストを保持
+  let originalText = "";
+
   // テキストエリアのリアルタイムカウント
   outputTextarea.addEventListener("input", () => {
     updateCharacterCount(outputTextarea, charCountElement);
@@ -14,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   chrome.runtime.sendMessage({ action: "runModal" }, (response) => {
     if (response) {
       outputTextarea.value = response.output;
+      originalText = response.output;
       updateCharacterCount(outputTextarea, charCountElement);
     }
   });
@@ -26,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     try {
-      const summary = await summarizeWithGemini(outputTextarea.value, apiKey);
+      const summary = await summarizeWithGemini(originalText, apiKey);
       outputTextarea.value = summary;
       updateCharacterCount(outputTextarea, charCountElement);
     } catch (e) {
@@ -34,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("要約に失敗しました");
     }
   });
+
 
   // 「Xへ投稿」ボタンが押されたときの処理
   postButton.addEventListener("click", () => {
