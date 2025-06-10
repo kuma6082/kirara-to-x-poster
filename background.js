@@ -1,14 +1,30 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "runModal") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        console.error("tabs.query failed", chrome.runtime.lastError);
+        sendResponse({ error: chrome.runtime.lastError.message });
+        return;
+      }
+      if (!tabs[0]) {
+        sendResponse({ error: "No active tab found" });
+        return;
+      }
       chrome.scripting.executeScript(
         {
           target: { tabId: tabs[0].id },
           func: runModal,
         },
         (results) => {
+          if (chrome.runtime.lastError) {
+            console.error("executeScript failed", chrome.runtime.lastError);
+            sendResponse({ error: chrome.runtime.lastError.message });
+            return;
+          }
           if (results && results[0]) {
             sendResponse(results[0].result);
+          } else {
+            sendResponse({ error: "No result" });
           }
         }
       );

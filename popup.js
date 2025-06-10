@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // バックグラウンドからデータ取得
   chrome.runtime.sendMessage({ action: "runModal" }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error("メッセージ送信に失敗しました", chrome.runtime.lastError);
+      return;
+    }
     if (response) {
       outputTextarea.value = response.output;
       originalText = response.output;
@@ -48,12 +52,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // オプション表示ボタン
   openOptionsBtn.addEventListener("click", () => {
-    chrome.windows.create({
-      url: chrome.runtime.getURL("options.html"),
-      type: "popup",
-      width: 400,
-      height: 200,
-    });
+    chrome.windows.create(
+      {
+        url: chrome.runtime.getURL("options.html"),
+        type: "popup",
+        width: 400,
+        height: 200,
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.error("オプションウィンドウの表示に失敗しました", chrome.runtime.lastError);
+        }
+      }
+    );
   });
 
 
@@ -104,9 +115,19 @@ function calculateCharacterCount(text) {
 // chrome.storage から API キー取得
 function loadApiKey() {
   return new Promise((resolve) => {
-    chrome.storage.local.get(["geminiApiKey"], (items) => {
-      resolve(items.geminiApiKey || "");
-    });
+    try {
+      chrome.storage.local.get(["geminiApiKey"], (items) => {
+        if (chrome.runtime.lastError) {
+          console.error("APIキー取得に失敗しました", chrome.runtime.lastError);
+          resolve("");
+        } else {
+          resolve(items.geminiApiKey || "");
+        }
+      });
+    } catch (e) {
+      console.error("APIキー取得時に例外", e);
+      resolve("");
+    }
   });
 }
 
@@ -124,20 +145,32 @@ async function summarizeWithGemini(text, apiKey) {
     ],
   };
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  );
+  let res;
+  try {
+    res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+  } catch (e) {
+    console.error("APIリクエストに失敗しました", e);
+    throw e;
+  }
 
   if (!res.ok) {
     throw new Error("API request failed");
   }
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    console.error("レスポンスの解析に失敗しました", e);
+    throw e;
+  }
   return (
     data.candidates?.[0]?.content?.parts?.[0]?.text || text
   );

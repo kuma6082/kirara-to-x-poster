@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load existing API key
   chrome.storage.local.get(['geminiApiKey'], (items) => {
+    if (chrome.runtime.lastError) {
+      console.error('APIキーの読み込みに失敗しました', chrome.runtime.lastError);
+      return;
+    }
     if (items.geminiApiKey) {
       input.value = items.geminiApiKey;
     }
@@ -12,7 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('saveButton').addEventListener('click', () => {
     chrome.storage.local.set({ geminiApiKey: input.value }, () => {
-      alert('保存しました');
+      if (chrome.runtime.lastError) {
+        console.error('APIキーの保存に失敗しました', chrome.runtime.lastError);
+        alert('保存に失敗しました');
+      } else {
+        alert('保存しました');
+      }
     });
   });
 });
