@@ -88,7 +88,11 @@ function updateCharacterCount(textarea, countElement) {
   const isOver = count > 280;
 
   countElement.textContent = `文字数: ${count}/280`;
-  countElement.style.color = isOver ? "#ff0000" : "#000000";
+
+  const isDark = window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const normalColor = isDark ? '#dddddd' : '#000000';
+  countElement.style.color = isOver ? '#ff0000' : normalColor;
 }
 
 // twitter-textライブラリを使用した正確な文字カウントロジック
