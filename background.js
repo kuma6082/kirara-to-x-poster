@@ -1,14 +1,37 @@
 const KIRARA_URL_PREFIX =
   "https://kirara-code.net/HappinessChain/reports/";
 
-// タブのURL変更時に拡張機能の有効/無効を切り替える
+// 指定URL以外では拡張機能を利用不可にする
+function updateActionForTab(tabId, url) {
+  if (url && url.startsWith(KIRARA_URL_PREFIX)) {
+    chrome.action.enable(tabId);
+  } else {
+    chrome.action.disable(tabId);
+  }
+}
+
+// タブのURL変更時
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url) {
-    if (tab.url.startsWith(KIRARA_URL_PREFIX)) {
-      chrome.action.enable(tabId);
-    } else {
-      chrome.action.disable(tabId);
+  if (changeInfo.status === "complete") {
+    updateActionForTab(tabId, tab.url);
+  }
+});
+
+// タブの切り替え時
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  chrome.tabs.get(tabId, (tab) => {
+    if (chrome.runtime.lastError) {
+      console.error("tabs.get failed", chrome.runtime.lastError);
+      return;
     }
+    updateActionForTab(tabId, tab.url);
+  });
+});
+
+// サービスワーカー起動時に現在のタブをチェック
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  if (tabs[0]) {
+    updateActionForTab(tabs[0].id, tabs[0].url);
   }
 });
 
