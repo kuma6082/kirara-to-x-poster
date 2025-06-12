@@ -1,3 +1,17 @@
+const KIRARA_URL_PREFIX =
+  "https://kirara-code.net/HappinessChain/reports/";
+
+// タブのURL変更時に拡張機能の有効/無効を切り替える
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete" && tab.url) {
+    if (tab.url.startsWith(KIRARA_URL_PREFIX)) {
+      chrome.action.enable(tabId);
+    } else {
+      chrome.action.disable(tabId);
+    }
+  }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "runModal") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
